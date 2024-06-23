@@ -1,3 +1,3 @@
-module control-flow
+module function
 
 go 1.22.4
