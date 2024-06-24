@@ -10,7 +10,7 @@ func main() {
 	a := 50
 	b := 10
 
-	// swap(&a, &b)
+	swap(&a, &b)
 
 	// fmt.Println(a)
 	// fmt.Println(b)
