@@ -1,60 +1,127 @@
 package main
 
-import (
-	"fmt"
-	"math"
-)
+import "fmt"
 
 func main() {
+	// var a [3]int = [3]int{1, 2, 3} //arrays
+	// fmt.Println(a[0], a[1], a[2])
 
-	a := 50
-	b := 10
+	// s := []int{1, 2, 3} //slice
+	// fmt.Println(s)
 
-	swap(&a, &b)
+	arr1 := [5]int{1, 2, 3, 4, 5}
+	// arr2 := [4]int{4, 5, 6, 20}
+	// fmt.Println(sumArray(arr))
+	// fmt.Println(concatArrays(arr1, arr2))
 
-	// fmt.Println(a)
-	// fmt.Println(b)
+	s := []int{1, 2, 3, 4, 5}
+	// fmt.Println(averageSlice(s))
+	// fmt.Println(maxInSlice(s))
+	// fmt.Println(filterEvenNumbers(s))
 
-	fmt.Println("Max : ", max(a, b))
-	fmt.Println("Sum : ", sum(a, b))
-	fmt.Println("IsEven : ", isEven(a))
-	fmt.Println("divide : ", divide(a, b))
-	fmt.Println("power : ", power(a, b))
+	// fmt.Println(mergeArrayAndSlice(arr1, s))
 
-}
+	fmt.Println(incrementArray(arr1))
 
-func swap(a, b *int) {
-	olda := *a
-	*a = *b
-	*b = olda
-}
-
-func max(a int, b int) int {
-	if a > b {
-		return a
+	if contain(s, 6) {
+		fmt.Println("Have this number")
+	} else {
+		fmt.Println("Not have this number")
 	}
-	return b
 
 }
 
-func sum(a int, b int) int {
-	sum := a + b
+func sumArray(arr [5]int) int {
+
+	sum := 0
+
+	for i := range arr {
+		sum += arr[i]
+	}
 	return sum
+
 }
 
-func isEven(a int) bool {
-	if evenCheck := a % 2; evenCheck == 0 {
-		return true
+func averageSlice(s []int) float64 {
+
+	sum := 0
+
+	for i := range s {
+		sum += s[i]
 	}
-	return false
+	avg := sum / len(s)
+
+	return float64(avg)
 }
 
-func divide(a int, b int) float64 {
-	divder := (float64(a)) / float64(b)
-	return divder
+func maxInSlice(s []int) int {
+	var max int
+
+	for i := range s {
+		if max == 0 {
+			max = s[i]
+			continue
+		}
+		if s[i] > max {
+			max = s[i]
+		}
+	}
+
+	return max
 }
 
-func power(base int, exponent int) int {
-	powerer := math.Pow(float64(base), float64(exponent))
-	return int(powerer)
+func filterEvenNumbers(s []int) []int {
+	evenSlice := []int{}
+
+	for i := range s {
+		if s[i]%2 == 0 {
+			evenSlice = append(evenSlice, s[i])
+		}
+	}
+	return evenSlice
+
+}
+
+func concatArrays(arr1 [4]int, arr2 [4]int) []int {
+	fusionSlice := []int{}
+
+	for i := range arr1 {
+		fusionSlice = append(fusionSlice, arr1[i])
+	}
+	for i := range arr2 {
+		fusionSlice = append(fusionSlice, arr2[i])
+	}
+	return fusionSlice
+}
+
+func mergeArrayAndSlice(arr [4]int, s []int) []int {
+	mergedArraySlice := []int{}
+
+	for i := range arr {
+		mergedArraySlice = append(mergedArraySlice, arr[i])
+	}
+	for i := range s {
+		mergedArraySlice = append(mergedArraySlice, s[i])
+	}
+	return mergedArraySlice
+
+}
+
+func incrementArray(arr [5]int) [5]int {
+	plusUpArr := [5]int{}
+	for i := range arr {
+		plusUpArr[i] = arr[i] + 1
+	}
+	return plusUpArr
+}
+
+func contain(s []int, value int) bool {
+	checker := false
+
+	for i := range s {
+		if s[i] == value {
+			checker = true
+		}
+	}
+	return checker
 }
