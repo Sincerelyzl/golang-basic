@@ -1,7 +1,52 @@
 package main
 
-func createPlayer(p *Player) error {
-	_, err := db.Exec(
+import (
+	"database/sql"
+	"fmt"
+
+	_ "github.com/lib/pq"
+)
+
+const (
+	host         = "localhost"
+	port         = 5432
+	databaseName = "mydatabase"
+	username     = "myuser"
+	password     = "mypassword"
+)
+
+type DatabaseController struct {
+	Db *sql.DB
+}
+
+func ConnectDatabase() (*DatabaseController, error) {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		host,
+		port,
+		username,
+		password,
+		databaseName,
+	)
+
+	sdb, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	client := &DatabaseController{
+		Db: sdb,
+	}
+
+	err = client.Db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+func (client *DatabaseController) CreatePlayer(p *Player) error {
+	_, err := client.Db.Exec(
 		"INSERT INTO public.player(player_name, player_lv)	VALUES ($1, $2)",
 		p.PlayerName,
 		p.PlayerLv,
@@ -10,9 +55,9 @@ func createPlayer(p *Player) error {
 	return err
 }
 
-func getPlayer(id int) (Player, error) {
+func (client *DatabaseController) GetPlayer(id int) (Player, error) {
 	var p Player
-	row := db.QueryRow("SELECT player_id, player_name, player_lv FROM player WHERE player_id=$1;", id)
+	row := client.Db.QueryRow("SELECT player_id, player_name, player_lv FROM player WHERE player_id=$1;", id)
 
 	err := row.Scan(&p.ID, &p.PlayerName, &p.PlayerLv)
 
@@ -22,9 +67,9 @@ func getPlayer(id int) (Player, error) {
 	return p, nil
 }
 
-func updatePlayer(id int, p *Player) (Player, error) {
+func (client *DatabaseController) UpdatePlayer(id int, p *Player) (Player, error) {
 	var up Player
-	row := db.QueryRow(
+	row := client.Db.QueryRow(
 		"UPDATE public.player SET player_name=$1, player_lv=$2 WHERE player_id=$3 RETURNING player_id, player_name, player_lv ;",
 		p.PlayerName,
 		p.PlayerLv,
@@ -40,13 +85,13 @@ func updatePlayer(id int, p *Player) (Player, error) {
 	return up, err
 }
 
-func deletePlayer(id int) error {
-	_, err := db.Exec("DELETE FROM public.player WHERE player_id=$1;", id)
+func (client *DatabaseController) DeletePlayer(id int) error {
+	_, err := client.Db.Exec("DELETE FROM public.player WHERE player_id=$1;", id)
 	return err
 }
 
-func getMorePlayer() ([]Player, error) {
-	rows, err := db.Query("SELECT player_id, player_name, player_lv FROM player;")
+func (client *DatabaseController) GetMorePlayer() ([]Player, error) {
+	rows, err := client.Db.Query("SELECT player_id, player_name, player_lv FROM player;")
 
 	if err != nil {
 		return nil, err
