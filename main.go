@@ -37,6 +37,9 @@ func main() {
 	}
 
 	db = sdb
+
+	defer db.Close()
+
 	err = db.Ping()
 
 	if err != nil {
@@ -60,6 +63,27 @@ func main() {
 	}
 	fmt.Println("Here ur Player : ", player)
 
+	//Update Player
+	// updatePlayer, err := updatePlayer(4, &Player{PlayerName: "Maprang", PlayerLv: 88})
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("Updated Player : ", updatePlayer)
+
+	//Delete Player
+	// err = deletePlayer(4)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("Player Delete Successfully!")
+
+	//Get More Player
+	players, err := getMorePlayer()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Here All Players : ", players)
+
 }
 
 func createPlayer(p *Player) error {
@@ -82,4 +106,53 @@ func getPlayer(id int) (Player, error) {
 		return Player{}, err
 	}
 	return p, nil
+}
+
+func updatePlayer(id int, p *Player) (Player, error) {
+	var up Player
+	row := db.QueryRow(
+		"UPDATE public.player SET player_name=$1, player_lv=$2 WHERE player_id=$3 RETURNING player_id, player_name, player_lv ;",
+		p.PlayerName,
+		p.PlayerLv,
+		id,
+	)
+
+	err := row.Scan(&up.ID, &up.PlayerName, &up.PlayerLv)
+
+	if err != nil {
+		return Player{}, err
+	}
+
+	return up, err
+}
+
+func deletePlayer(id int) error {
+	_, err := db.Exec("DELETE FROM public.player WHERE player_id=$1;", id)
+	return err
+}
+
+func getMorePlayer() ([]Player, error) {
+	rows, err := db.Query("SELECT player_id, player_name, player_lv FROM player;")
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var players []Player
+	for rows.Next() {
+		var p Player
+		err := rows.Scan(&p.ID, &p.PlayerName, &p.PlayerLv)
+
+		if err != nil {
+			return nil, err
+		}
+
+		players = append(players, p)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return players, nil
 }
